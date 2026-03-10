@@ -28,11 +28,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Execution of a script containing strategy.entry/strategy.exit calls produces trade event objects with direction, bar index, and price
   4. A Pine Script with syntax errors shows the error message and location inline in the Monaco editor (red underline or gutter marker)
   5. PineTS execution uses the imported SBIN_5.xlsx dataset (18,850 OHLCV candles) as its data source, not hardcoded data
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: PineTS installation, TypeScript integration, and basic transpile+execute pipeline
-- [ ] 01-02: Dataset feeding, indicator series extraction, trade event extraction, and error handling
+- [ ] 01-01-PLAN.md — PineTS installation, data adapter, backend candle endpoint, and PineExecutionService
+- [ ] 01-02-PLAN.md — React hook, editor error markers, WorkspacePage wiring, and end-to-end verification
 
 ### Phase 2: Chart Rendering + Run Integration
 **Goal**: Users see Pine Script execution results visually on the Pine screen -- candlestick chart from dataset, indicator overlays from execution, trade markers from strategy signals -- triggered by clicking Run
