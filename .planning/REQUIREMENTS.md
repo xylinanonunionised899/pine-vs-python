@@ -61,7 +61,7 @@ Deferred to future release. Tracked but not in current roadmap.
 
 | Feature | Reason |
 |---------|--------|
-| TradingView browser automation (Playwright) | Replaced by PineTS local execution — faster, simpler, offline |
+| TradingView browser automation (Playwright) | Replaced by PineTS local execution -- faster, simpler, offline |
 | Python strategy engine changes | Already dynamic, no changes needed |
 | Real-time live data feed | Focus on replay/historical data for this milestone |
 | TradingView alerts/notifications | Not needed for strategy comparison |
@@ -75,26 +75,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PINE-01 | TBD | Pending |
-| PINE-02 | TBD | Pending |
-| PINE-03 | TBD | Pending |
-| PINE-04 | TBD | Pending |
-| CHART-01 | TBD | Pending |
-| CHART-02 | TBD | Pending |
-| CHART-03 | TBD | Pending |
-| INTG-01 | TBD | Pending |
-| INTG-02 | TBD | Pending |
-| INTG-03 | TBD | Pending |
-| UX-01 | TBD | Pending |
-| UX-02 | TBD | Pending |
-| UX-03 | TBD | Pending |
-| PERF-01 | TBD | Pending |
+| PINE-01 | Phase 1: PineTS Engine + Data Pipeline | Pending |
+| PINE-02 | Phase 1: PineTS Engine + Data Pipeline | Pending |
+| PINE-03 | Phase 1: PineTS Engine + Data Pipeline | Pending |
+| PINE-04 | Phase 1: PineTS Engine + Data Pipeline | Pending |
+| CHART-01 | Phase 2: Chart Rendering + Run Integration | Pending |
+| CHART-02 | Phase 2: Chart Rendering + Run Integration | Pending |
+| CHART-03 | Phase 2: Chart Rendering + Run Integration | Pending |
+| INTG-01 | Phase 2: Chart Rendering + Run Integration | Pending |
+| INTG-02 | Phase 3: UX Completion + Comparison + Performance | Pending |
+| INTG-03 | Phase 1: PineTS Engine + Data Pipeline | Pending |
+| UX-01 | Phase 3: UX Completion + Comparison + Performance | Pending |
+| UX-02 | Phase 2: Chart Rendering + Run Integration | Pending |
+| UX-03 | Phase 3: UX Completion + Comparison + Performance | Pending |
+| PERF-01 | Phase 3: UX Completion + Comparison + Performance | Pending |
 
 **Coverage:**
 - v1 requirements: 14 total
-- Mapped to phases: 0
-- Unmapped: 14 ⚠️
+- Mapped to phases: 14
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-10*
-*Last updated: 2026-03-10 after initial definition*
+*Last updated: 2026-03-10 after roadmap creation*
