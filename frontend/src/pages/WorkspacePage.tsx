@@ -51,6 +51,7 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
 
   return (
     <div className="workspace-grid route-grid">
+      <style>{`@keyframes pine-spin { to { transform: rotate(360deg); } }`}</style>
       <section className="pane pane-main">
         <div className="action-row surface toolbar-card">
           <label className="field compact-field">
@@ -77,6 +78,21 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
           <button className="action-button" type="button" onClick={onRunPine} disabled={pineExecutionState.isRunning}>
             {pineExecutionState.isRunning ? "Running Pine..." : "Run Pine"}
           </button>
+          {pineExecutionState.isRunning && (
+            <span className="pine-status pine-status--running" title="Executing Pine Script..." style={{ fontSize: "0.75rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "0.25rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "0.25rem", color: "#f4b942", background: "rgba(244, 185, 66, 0.1)" }}>
+              <span style={{ animation: "pine-spin 1s linear infinite", display: "inline-block" }}>&#x27F3;</span> Running
+            </span>
+          )}
+          {!pineExecutionState.isRunning && pineExecutionState.errors.length > 0 && (
+            <span className="pine-status pine-status--error" title={pineExecutionState.errors[0].message} style={{ fontSize: "0.75rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "0.25rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "0.25rem", color: "#ff6b6b", background: "rgba(255, 107, 107, 0.1)" }}>
+              &#x2715; Error
+            </span>
+          )}
+          {!pineExecutionState.isRunning && pineExecutionState.errors.length === 0 && pineExecutionState.lastRunAt !== null && (
+            <span className="pine-status pine-status--success" title="Pine Script executed successfully" style={{ fontSize: "0.75rem", fontWeight: 600, padding: "0.15rem 0.5rem", borderRadius: "0.25rem", display: "inline-flex", alignItems: "center", gap: "0.25rem", marginLeft: "0.25rem", color: "#20c997", background: "rgba(32, 201, 151, 0.1)" }}>
+              &#x2713; Done
+            </span>
+          )}
           <button className="action-button" type="button" onClick={onReplay}>{busy.replay ? "Running replay..." : "Run replay"}</button>
           <button className="action-button" type="button" onClick={onLive}>{busy.live ? "Starting live..." : "Start live run"}</button>
         </div>
@@ -84,11 +100,10 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
         <div className="split-pane">
           <article className="surface workspace-card">
             <PineEditor artifact={pineArtifact} onChange={onPineArtifactChange} errors={pineExecutionState.errors} />
-            <ChartPanel title="Pine screen" seriesName={pineSeries[0]?.name ?? "No Pine series"} tone="pine" candles={pineChartCandles} indicatorSeries={pineSeries} emptyMessage="Click 'Run Pine' to execute Pine Script with PineTS." />
+            <ChartPanel title="Pine screen" seriesName={pineSeries[0]?.name ?? "No Pine series"} tone="pine" candles={pineChartCandles} indicatorSeries={pineSeries} emptyMessage="Click 'Run Pine' to execute Pine Script with PineTS." trades={pineExecutionState.trades} />
             {pineExecutionState.lastRunAt && (
               <p className="chart-label" style={{ fontSize: "0.75rem", opacity: 0.7, padding: "0 0.5rem" }}>
-                Last Pine run: {new Date(pineExecutionState.lastRunAt).toLocaleTimeString()}
-                {pineExecutionState.trades.length > 0 ? ` | ${pineExecutionState.trades.length} trade events` : ""}
+                Last run: {new Date(pineExecutionState.lastRunAt).toLocaleTimeString()}
               </p>
             )}
           </article>
