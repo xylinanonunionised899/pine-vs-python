@@ -44,11 +44,11 @@ Plans:
   3. Trade events (strategy.entry/exit) appear as buy/sell arrow markers on the chart at the correct bar positions
   4. User clicks a "Run" button and Pine Script executes immediately -- no preview step, no confirmation dialog
   5. An execution status indicator (running spinner / complete checkmark / error icon) is visible while Pine Script runs and after it finishes
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: Candlestick chart rendering from dataset and indicator overlay on Pine screen
-- [ ] 02-02: Trade markers, Run button integration, and execution status indicator
+- [ ] 02-01-PLAN.md — Multi-pane oscillator rendering and trade markers on ChartPanel
+- [ ] 02-02-PLAN.md — Wire trades to ChartPanel, execution status indicator, and visual verification
 
 ### Phase 3: UX Completion + Comparison + Performance
 **Goal**: Users have a dedicated Pine Automation tab, cached results for unchanged scripts, Pine vs Python comparison through the existing ComparisonEngine, and non-blocking execution on large datasets via Web Worker
