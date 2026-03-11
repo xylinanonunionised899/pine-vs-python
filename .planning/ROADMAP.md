@@ -13,7 +13,7 @@ This milestone adds dynamic Pine Script execution to the Trading Strategy Compar
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: PineTS Engine + Data Pipeline** - Install PineTS, transpile+execute Pine Script against imported OHLCV data, produce indicator series and trade events
-- [ ] **Phase 2: Chart Rendering + Run Integration** - Display execution results as candles, indicator overlays, and trade markers on Pine screen with Run button
+- [x] **Phase 2: Chart Rendering + Run Integration** - Display execution results as candles, indicator overlays, and trade markers on Pine screen with Run button
 - [ ] **Phase 3: UX Completion + Comparison + Performance** - Pine Automation tab, result caching, ComparisonEngine integration, Web Worker for large datasets
 
 ## Phase Details
@@ -47,8 +47,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Multi-pane oscillator rendering and trade markers on ChartPanel
-- [ ] 02-02-PLAN.md — Wire trades to ChartPanel, execution status indicator, and visual verification
+- [x] 02-01-PLAN.md — Multi-pane oscillator rendering and trade markers on ChartPanel
+- [x] 02-02-PLAN.md — Wire trades to ChartPanel, execution status indicator, and visual verification
 
 ### Phase 3: UX Completion + Comparison + Performance
 **Goal**: Users have a dedicated Pine Automation tab, cached results for unchanged scripts, Pine vs Python comparison through the existing ComparisonEngine, and non-blocking execution on large datasets via Web Worker
@@ -72,5 +72,5 @@ Phases execute in numeric order: 1 --> 2 --> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. PineTS Engine + Data Pipeline | 0/2 | Not started | - |
-| 2. Chart Rendering + Run Integration | 0/2 | Not started | - |
+| 2. Chart Rendering + Run Integration | 2/2 | Complete | 2026-03-11 |
 | 3. UX Completion + Comparison + Performance | 0/1 | Not started | - |

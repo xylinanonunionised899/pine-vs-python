@@ -22,14 +22,14 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Integration
 
-- [ ] **INTG-01**: Pine Script auto-runs when user clicks "Run" (immediate, no preview step)
+- [x] **INTG-01**: Pine Script auto-runs when user clicks "Run" (immediate, no preview step)
 - [ ] **INTG-02**: Pine execution results feed into existing ComparisonEngine for Pine vs Python diff
 - [ ] **INTG-03**: Pine execution uses imported dataset (same OHLCV data as Python side)
 
 ### UX
 
 - [ ] **UX-01**: New "Pine Automation" tab/page for dedicated Pine Script testing
-- [ ] **UX-02**: Execution status indicator (running/complete/error) visible during Pine Script run
+- [x] **UX-02**: Execution status indicator (running/complete/error) visible during Pine Script run
 - [ ] **UX-03**: Result caching — re-running unchanged Pine Script reuses previous results
 
 ### Performance
@@ -82,11 +82,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CHART-01 | Phase 2: Chart Rendering + Run Integration | Complete |
 | CHART-02 | Phase 2: Chart Rendering + Run Integration | Complete |
 | CHART-03 | Phase 2: Chart Rendering + Run Integration | Complete |
-| INTG-01 | Phase 2: Chart Rendering + Run Integration | Pending |
+| INTG-01 | Phase 2: Chart Rendering + Run Integration | Complete |
 | INTG-02 | Phase 3: UX Completion + Comparison + Performance | Pending |
 | INTG-03 | Phase 1: PineTS Engine + Data Pipeline | Pending |
 | UX-01 | Phase 3: UX Completion + Comparison + Performance | Pending |
-| UX-02 | Phase 2: Chart Rendering + Run Integration | Pending |
+| UX-02 | Phase 2: Chart Rendering + Run Integration | Complete |
 | UX-03 | Phase 3: UX Completion + Comparison + Performance | Pending |
 | PERF-01 | Phase 3: UX Completion + Comparison + Performance | Pending |
 
