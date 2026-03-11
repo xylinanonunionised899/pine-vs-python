@@ -16,9 +16,9 @@ Requirements for this milestone. Each maps to roadmap phases.
 
 ### Chart Display
 
-- [ ] **CHART-01**: Pine screen shows candlestick chart from imported dataset (OHLCV data)
-- [ ] **CHART-02**: Pine screen overlays indicator series produced by Pine Script execution
-- [ ] **CHART-03**: Pine screen shows trade markers (buy/sell arrows) from strategy signals
+- [x] **CHART-01**: Pine screen shows candlestick chart from imported dataset (OHLCV data)
+- [x] **CHART-02**: Pine screen overlays indicator series produced by Pine Script execution
+- [x] **CHART-03**: Pine screen shows trade markers (buy/sell arrows) from strategy signals
 
 ### Integration
 
@@ -79,9 +79,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PINE-02 | Phase 1: PineTS Engine + Data Pipeline | Pending |
 | PINE-03 | Phase 1: PineTS Engine + Data Pipeline | Pending |
 | PINE-04 | Phase 1: PineTS Engine + Data Pipeline | Pending |
-| CHART-01 | Phase 2: Chart Rendering + Run Integration | Pending |
-| CHART-02 | Phase 2: Chart Rendering + Run Integration | Pending |
-| CHART-03 | Phase 2: Chart Rendering + Run Integration | Pending |
+| CHART-01 | Phase 2: Chart Rendering + Run Integration | Complete |
+| CHART-02 | Phase 2: Chart Rendering + Run Integration | Complete |
+| CHART-03 | Phase 2: Chart Rendering + Run Integration | Complete |
 | INTG-01 | Phase 2: Chart Rendering + Run Integration | Pending |
 | INTG-02 | Phase 3: UX Completion + Comparison + Performance | Pending |
 | INTG-03 | Phase 1: PineTS Engine + Data Pipeline | Pending |
