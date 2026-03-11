@@ -46,8 +46,11 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
     ? pineExecutionState.indicators
     : currentRun?.pine_series ?? [];
   const pythonSeries = currentRun?.python_series ?? [];
-  const candles = currentRun?.candles ?? [];
-  const pineChartCandles = pineCandles.length > 0 ? pineCandles : candles;
+  const runCandles = currentRun?.candles ?? [];
+
+  // Unified candle source: after Pine runs (loads from selected dataset), BOTH charts
+  // use the same candles so they stay aligned. Falls back to currentRun candles.
+  const chartCandles = pineCandles.length > 0 ? pineCandles : runCandles;
 
   return (
     <div className="workspace-grid route-grid">
@@ -100,7 +103,7 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
         <div className="split-pane">
           <article className="surface workspace-card">
             <PineEditor artifact={pineArtifact} onChange={onPineArtifactChange} errors={pineExecutionState.errors} />
-            <ChartPanel title="Pine screen" seriesName={pineSeries[0]?.name ?? "No Pine series"} tone="pine" candles={pineChartCandles} indicatorSeries={pineSeries} emptyMessage="Click 'Run Pine' to execute Pine Script with PineTS." trades={pineExecutionState.trades} />
+            <ChartPanel title="Pine screen" seriesName={pineSeries[0]?.name ?? "No Pine series"} tone="pine" candles={chartCandles} indicatorSeries={pineSeries} emptyMessage="Click 'Run Pine' to execute Pine Script with PineTS." trades={pineExecutionState.trades} />
             {pineExecutionState.lastRunAt && (
               <p className="chart-label" style={{ fontSize: "0.75rem", opacity: 0.7, padding: "0 0.5rem" }}>
                 Last run: {new Date(pineExecutionState.lastRunAt).toLocaleTimeString()}
@@ -109,7 +112,7 @@ export function WorkspacePage({ runConfig, pineArtifact, pythonArtifact, current
           </article>
           <article className="surface workspace-card">
             <PythonEditor artifact={pythonArtifact} onChange={onPythonArtifactChange} />
-            <ChartPanel title="Python screen" seriesName={pythonSeries[0]?.name ?? "No Python series"} tone="python" candles={candles} indicatorSeries={pythonSeries} emptyMessage="Run replay or live mode to populate Python outputs." />
+            <ChartPanel title="Python screen" seriesName={pythonSeries[0]?.name ?? "No Python series"} tone="python" candles={chartCandles} indicatorSeries={pythonSeries} emptyMessage="Run replay or live mode to populate Python outputs." />
           </article>
         </div>
 

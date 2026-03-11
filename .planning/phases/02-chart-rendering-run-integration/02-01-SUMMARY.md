@@ -64,7 +64,7 @@ Each task was committed atomically:
 
 1. **Task 1: Add multi-pane oscillator rendering and trade markers to ChartPanel** - `35be305` (feat)
 
-**Plan metadata:** [pending] (docs: complete plan)
+**Plan metadata:** `841e24c` (docs: complete plan)
 
 ## Files Created/Modified
 - `frontend/src/components/charts/ChartPanel.tsx` - Extended with multi-pane rendering (paneIndex=1 for oscillators), trade arrow markers (createSeriesMarkers), dynamic chart height, and updated summary box

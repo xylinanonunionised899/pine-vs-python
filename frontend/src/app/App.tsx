@@ -12,7 +12,7 @@ import type {
   RunStatus,
   StrategyArtifact,
 } from "@shared/contracts";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { BrowserRouter, NavLink, Navigate, Route, Routes, useNavigate } from "react-router-dom";
 
 import { defaultBridgeJson, defaultDataSource, defaultPineArtifact, defaultPythonArtifact, defaultRunConfig } from "@/lib/defaults";
@@ -159,6 +159,21 @@ function AppRoutes() {
   useEffect(() => {
     void refreshCore();
   }, []);
+
+  // Auto-run PineTS once a dataset is available (after refreshCore loads datasets).
+  // Fires only once so the Pine chart shows indicators immediately on first load.
+  const autoRunPineFired = useRef(false);
+  useEffect(() => {
+    if (
+      !autoRunPineFired.current &&
+      state.selectedDatasetId &&
+      !pineExecution.lastRunAt &&
+      !pineExecution.isRunning
+    ) {
+      autoRunPineFired.current = true;
+      void handleRunPine();
+    }
+  }, [state.selectedDatasetId, pineExecution.lastRunAt, pineExecution.isRunning]);
 
   useEffect(() => {
     if (!currentRun || currentRun.lifecycle !== "live") {
