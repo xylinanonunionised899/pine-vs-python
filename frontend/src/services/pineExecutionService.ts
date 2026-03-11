@@ -16,6 +16,30 @@ export interface PineExecutionResult {
   rawResult: Record<string, unknown>;
 }
 
+/**
+ * PineTS does not support strategy() — only indicator().
+ * Auto-convert strategy scripts to indicator scripts by:
+ * 1. Replacing strategy(...) declaration with indicator(...)
+ * 2. Removing strategy.entry/exit/close/order/cancel lines
+ * 3. Preserving all indicator logic (plots, ta.* calls, conditions)
+ */
+function convertStrategyToIndicator(source: string): { code: string; wasStrategy: boolean } {
+  const wasStrategy = /strategy\s*\(/.test(source);
+  if (!wasStrategy) return { code: source, wasStrategy: false };
+
+  let code = source;
+  // Replace strategy() declaration with indicator()
+  code = code.replace(/strategy\s*\(/, "indicator(");
+  // Remove strategy.entry/exit/close/order/cancel_all lines and their parent if-block if it becomes empty
+  code = code.replace(/^\s*strategy\.(entry|exit|close|close_all|order|cancel|cancel_all)\s*\(.*\)\s*$/gm, "");
+  // Remove if-blocks that now have empty bodies (Pine Script requires non-empty blocks)
+  // Pattern: "if condition\n" followed only by blank lines until next non-indented line or EOF
+  code = code.replace(/^\s*if\s+.+\n(\s*\n)*(?=\S|$)/gm, "");
+  // Clean up multiple blank lines
+  code = code.replace(/\n{3,}/g, "\n\n");
+  return { code, wasStrategy: true };
+}
+
 export async function executePineScript(
   sourceCode: string,
   candles: CandlePoint[],
@@ -32,17 +56,18 @@ export async function executePineScript(
   }
 
   const pineTSCandles = toPineTSCandles(candles);
+  const { code: runnableCode, wasStrategy } = convertStrategyToIndicator(sourceCode);
 
   try {
     const pineTS = new PineTS(pineTSCandles);
-    const { result, plots } = await pineTS.run(sourceCode);
+    const { result, plots } = await pineTS.run(runnableCode);
 
     // Log raw output for debugging (PineTS output shape needs validation per RESEARCH open questions)
     console.log("[PineTS] Raw plots:", JSON.stringify(plots, null, 2).slice(0, 500));
     console.log("[PineTS] Raw result:", JSON.stringify(result, null, 2).slice(0, 500));
 
     const indicators = mapPlotsToIndicatorSeries(plots, candles, warmupBars);
-    const trades = extractTradeEvents(result, plots, candles, sourceCode);
+    const trades = extractTradeEvents(result, plots, candles, sourceCode, wasStrategy);
 
     return {
       indicators,
@@ -59,34 +84,44 @@ export async function executePineScript(
 }
 
 function mapPlotsToIndicatorSeries(
-  plots: Record<string, { data?: Array<{ value?: number }> }>,
+  plots: Record<string, { data?: Array<{ time?: number; value?: number | null; options?: { color?: string } }> }>,
   candles: CandlePoint[],
   warmupBars: number,
 ): IndicatorSeries[] {
   if (!plots || typeof plots !== "object") return [];
 
-  return Object.entries(plots).map(([name, plot]) => {
-    // Handle PineTS #N disambiguation suffixes in plot titles
-    const cleanName = name.replace(/#\d+$/, "").trim();
-    const dataArray = Array.isArray(plot?.data) ? plot.data : [];
+  return Object.entries(plots)
+    .filter(([, plot]) => Array.isArray(plot?.data) && plot.data.length > 0)
+    .map(([name, plot], plotIndex) => {
+      // PineTS uses #0, #1, etc. as plot keys — derive a friendlier name
+      const cleanName = name.startsWith("#") ? `plot_${plotIndex}` : name.replace(/#\d+$/, "").trim();
+      const dataArray = plot.data!;
 
-    const values: IndicatorPoint[] = dataArray.map((point, index) => ({
-      timestamp: candles[index]?.timestamp ?? new Date().toISOString(),
-      value: typeof point === "number" ? point : (point?.value ?? null),
-    }));
+      // PineTS data format: { time (epoch ms), value (number|null|NaN), options: { color } }
+      const values: IndicatorPoint[] = dataArray.map((point, index) => {
+        const v = point?.value;
+        return {
+          timestamp: candles[index]?.timestamp ?? new Date(point.time ?? 0).toISOString(),
+          value: (v !== null && v !== undefined && !Number.isNaN(v)) ? v : null,
+        };
+      });
 
-    // Detect pane: if name contains RSI, MACD, Stoch, histogram -> "sub", else "main"
-    const oscillatorPatterns = /rsi|macd|stoch|histogram|momentum|cci|atr|adx|willr|mfi/i;
-    const pane = oscillatorPatterns.test(cleanName) ? "sub" : "main";
+      // Extract color from first non-null point's options
+      const firstColored = dataArray.find((p) => p.options?.color);
+      const color = firstColored?.options?.color ?? "#f4b942";
 
-    return {
-      name: cleanName,
-      pane,
-      style: { color: "#f4b942" },
-      warmup_bars: warmupBars,
-      values,
-    };
-  });
+      // Detect pane: if name contains RSI, MACD, Stoch, histogram -> "sub", else "main"
+      const oscillatorPatterns = /rsi|macd|stoch|histogram|momentum|cci|atr|adx|willr|mfi/i;
+      const pane = oscillatorPatterns.test(cleanName) ? "sub" : "main";
+
+      return {
+        name: cleanName,
+        pane,
+        style: { color },
+        warmup_bars: warmupBars,
+        values,
+      };
+    });
 }
 
 function extractTradeEvents(
@@ -94,20 +129,10 @@ function extractTradeEvents(
   _plots: Record<string, unknown>,
   candles: CandlePoint[],
   sourceCode: string,
+  wasStrategy: boolean = false,
 ): TradeEvent[] {
-  // Approach 1: Check if PineTS provides structured trade events directly
-  if (result && typeof result === "object") {
-    const strategyKeys = Object.keys(result).filter(
-      (k) => k.includes("strategy") || k.includes("trade") || k.includes("entry") || k.includes("exit"),
-    );
-    if (strategyKeys.length > 0) {
-      console.log("[PineTS] Found strategy keys in result:", strategyKeys);
-    }
-  }
-
-  // Approach 2: Fallback -- derive trade events from boolean signals in result
-  const isStrategy = /strategy\s*\(/.test(sourceCode);
-  if (!isStrategy) return [];
+  // Only extract trades if the original script was a strategy
+  if (!wasStrategy && !/strategy\s*\(/.test(sourceCode)) return [];
 
   // Look for boolean condition variables in result
   const trades: TradeEvent[] = [];

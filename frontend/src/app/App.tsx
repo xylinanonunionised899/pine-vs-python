@@ -146,7 +146,7 @@ function AppRoutes() {
         bridgeArtifacts,
         availableModels,
         selectedChatModel,
-        selectedDatasetId: current.selectedDatasetId ?? datasets[0]?.dataset_id ?? null,
+        selectedDatasetId: current.selectedDatasetId ?? ([...datasets].sort((a, b) => b.row_count - a.row_count)[0]?.dataset_id ?? null),
         selectedRunId: current.selectedRunId ?? runs[0]?.run_id ?? null,
         selectedBridgeArtifactId: current.selectedBridgeArtifactId ?? bridgeArtifacts[0]?.artifact_id ?? null,
         backendNotice: dependencyFailure && current.datasets.length === 0 && current.runs.length === 0
