@@ -20,6 +20,14 @@ from app.services.run_service import run_service
 
 _log = logging.getLogger(__name__)
 
+# Canonical set of loopback identifiers checked at startup.
+# NOTE: This check reads `settings.app_host`, which is an application-level
+# config value. If the actual uvicorn bind address is set independently (e.g.
+# via the CLI --host flag or a separate env var), this check may not reflect
+# the real bind address. Always ensure `settings.app_host` is kept in sync
+# with the value passed to uvicorn.
+_LOOPBACK_ADDRESSES: frozenset[str] = frozenset({"127.0.0.1", "::1", "localhost"})
+
 
 @asynccontextmanager
 async def _lifespan(application: FastAPI):  # noqa: ARG001
@@ -30,10 +38,9 @@ async def _lifespan(application: FastAPI):  # noqa: ARG001
         seed_service.seed_if_needed()
     except Exception as e:
         _log.warning("Demo seed failed: %s", e, exc_info=True)
-    _loopback_addresses = ("127.0.0.1", "::1", "localhost")
-    if settings.app_host not in _loopback_addresses:
+    if settings.app_host not in _LOOPBACK_ADDRESSES:
         _log.warning(
-            "WARNING: Backend is configured to bind to '%s'. This app is designed for"
+            "Backend is configured to bind to '%s'. This app is designed for"
             " single-user local desktop use only. Binding to a non-loopback address"
             " exposes all endpoints without authentication.",
             settings.app_host,
