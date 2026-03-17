@@ -1,10 +1,13 @@
 from __future__ import annotations
 
+import logging
 from datetime import UTC, datetime
 import threading
 from threading import Event, Thread
 from time import sleep
 from uuid import uuid4
+
+_log = logging.getLogger(__name__)
 
 from app.core.comparison_engine import ComparisonEngine
 from app.core.data_manager import DataManager
@@ -199,8 +202,9 @@ class RunService:
         if run.lifecycle != RunLifecycle.LIVE:
             raise ValueError(f"Run {run_id} is not live (lifecycle={run.lifecycle})")
         event = self._stop_events.get(run_id)
-        if event:
-            event.set()
+        if event is None:
+            raise ValueError(f"Run {run_id} has no active stop handle (may have already finished)")
+        event.set()
         return self.get_run(run_id)
 
     def _live_loop(self, run_id: str, frame, companion_frames, run_config, bridge_artifact: BridgeArtifact | None, python_artifact: StrategyArtifact) -> None:
@@ -251,17 +255,18 @@ class RunService:
                         run.warnings = list(run.warnings or []) + ["Stopped by user"]
                     run.updated_at = datetime.now(UTC)
                     self._persist_run(run)
-            except Exception:
-                pass
+            except Exception as stop_exc:
+                _log.error("live_loop run=%s failed to persist stop state: %s", run_id, stop_exc)
         except Exception as exc:
+            _log.error("live_loop run=%s crashed: %s", run_id, exc, exc_info=True)
             try:
                 run = self.get_run(run_id)
                 run.lifecycle = RunLifecycle.FAILED
                 run.warnings = list(run.warnings or []) + [f"Live worker error: {exc}"]
                 run.updated_at = datetime.now(UTC)
                 self._persist_run(run)
-            except Exception:
-                pass
+            except Exception as persist_exc:
+                _log.error("live_loop run=%s also failed to persist FAILED state: %s", run_id, persist_exc)
         finally:
             self._live_threads.pop(run_id, None)
             self._stop_events.pop(run_id, None)
