@@ -37,7 +37,6 @@ class Settings(BaseSettings):
     app_port: int = 8000
     frontend_port: int = 5173
     sqlite_path: Path = Path("../data/app.db")
-    duckdb_path: Path = Path("../data/cache/market_data.duckdb")
     parquet_root: Path = Path("../data/artifacts")
     tradingview_session_file: Path = Path("../data/tradingview_session.json")
     allow_local_pine_subset: bool = True
