@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from threading import Thread
+import threading
+from threading import Event, Thread
 from time import sleep
 from uuid import uuid4
 
@@ -23,6 +24,8 @@ class RunService:
         self.comparison_engine = ComparisonEngine()
         self.storage = storage_service
         self._live_threads: dict[str, Thread] = {}
+        self._stop_events: dict[str, Event] = {}
+        self._run_cache: dict[str, RunStatus] = {}
 
     def create_replay_run(self, run_config, python_artifact: StrategyArtifact, pine_artifact: StrategyArtifact | None = None, dataset_id: str | None = None, bridge_artifact_id: str | None = None) -> RunStatus:
         if not dataset_id:
@@ -124,6 +127,8 @@ class RunService:
             updated_at=datetime.now(UTC),
         )
         self._persist_run(run)
+        stop_event = Event()
+        self._stop_events[run.run_id] = stop_event
         thread = Thread(target=self._live_loop, args=(run.run_id, frame, companion_frames, run_config, bridge_artifact, python_artifact), daemon=True)
         self._live_threads[run.run_id] = thread
         thread.start()
@@ -134,6 +139,8 @@ class RunService:
         return sorted(rows, key=lambda row: row.updated_at, reverse=True)
 
     def get_run(self, run_id: str) -> RunStatus:
+        if run_id in self._run_cache:
+            return self._run_cache[run_id]
         for run in self.list_runs():
             if run.run_id == run_id:
                 return run
@@ -145,6 +152,7 @@ class RunService:
         return LiveBarEvent(run_id=run.run_id, lifecycle=run.lifecycle, current_index=run.live_progress, total=run.live_total, latest_candle=latest_candle, comparison=run.comparison, updated_at=run.updated_at)
 
     def _persist_run(self, run: RunStatus) -> None:
+        self._run_cache[run.run_id] = run
         self.storage.upsert_record(self.storage.runs_index, "run_id", run.run_id, run.model_dump(mode="json"))
 
     def _resolve_bridge(self, bridge_artifact_id: str | None) -> BridgeArtifact | None:
@@ -186,41 +194,77 @@ class RunService:
             comparison.unsupported_feature_warnings.extend(warnings)
         return comparison, warnings
 
+    def stop_live_run(self, run_id: str) -> RunStatus:
+        run = self.get_run(run_id)
+        if run.lifecycle != RunLifecycle.LIVE:
+            raise ValueError(f"Run {run_id} is not live (lifecycle={run.lifecycle})")
+        event = self._stop_events.get(run_id)
+        if event:
+            event.set()
+        return self.get_run(run_id)
+
     def _live_loop(self, run_id: str, frame, companion_frames, run_config, bridge_artifact: BridgeArtifact | None, python_artifact: StrategyArtifact) -> None:
-        while True:
-            run = self.get_run(run_id)
-            if run.live_progress >= len(frame):
-                run.lifecycle = RunLifecycle.COMPLETED
+        stop_event = self._stop_events.get(run_id, Event())
+        try:
+            while not stop_event.is_set():
+                run = self.get_run(run_id)
+                if run.live_progress >= len(frame):
+                    run.lifecycle = RunLifecycle.COMPLETED
+                    run.updated_at = datetime.now(UTC)
+                    self._persist_run(run)
+                    return
+                next_progress = min(run.live_progress + 1, len(frame))
+                active_frame = frame.iloc[:next_progress].copy()
+                python_series, trade_events, _ = self.python_engine.execute(python_artifact, active_frame, run_config, companion_frames=companion_frames)
+                run.candles = self.data_manager.to_candles(active_frame)
+                run.python_series = python_series
+                run.trade_events = trade_events
+                run.live_progress = next_progress
+                run.pine_series = self._slice_series(bridge_artifact.indicator_series, next_progress) if bridge_artifact else []
+                pine_trades = self._slice_trades(bridge_artifact.trade_events, run.candles[-1].timestamp if run.candles and bridge_artifact else None) if bridge_artifact else []
+                comparison, warnings = self._build_comparison(
+                    run_config,
+                    run.dataset_id or "",
+                    run.bridge_artifact_id,
+                    run.pine_artifact,
+                    bridge_artifact,
+                    run.pine_series,
+                    run.python_series,
+                    pine_trades,
+                    run.trade_events,
+                    True,
+                    companion_dataset_ids=run.companion_dataset_ids,
+                )
+                run.comparison = comparison
+                run.warnings = warnings
                 run.updated_at = datetime.now(UTC)
                 self._persist_run(run)
-                return
-            next_progress = min(run.live_progress + 1, len(frame))
-            active_frame = frame.iloc[:next_progress].copy()
-            python_series, trade_events, _ = self.python_engine.execute(python_artifact, active_frame, run_config, companion_frames=companion_frames)
-            run.candles = self.data_manager.to_candles(active_frame)
-            run.python_series = python_series
-            run.trade_events = trade_events
-            run.live_progress = next_progress
-            run.pine_series = self._slice_series(bridge_artifact.indicator_series, next_progress) if bridge_artifact else []
-            pine_trades = self._slice_trades(bridge_artifact.trade_events, run.candles[-1].timestamp if run.candles and bridge_artifact else None) if bridge_artifact else []
-            comparison, warnings = self._build_comparison(
-                run_config,
-                run.dataset_id or "",
-                run.bridge_artifact_id,
-                run.pine_artifact,
-                bridge_artifact,
-                run.pine_series,
-                run.python_series,
-                pine_trades,
-                run.trade_events,
-                True,
-                companion_dataset_ids=run.companion_dataset_ids,
-            )
-            run.comparison = comparison
-            run.warnings = warnings
-            run.updated_at = datetime.now(UTC)
-            self._persist_run(run)
-            sleep(1)
+                sleep(1)
+            # stop_event was set — mark as FAILED with a user-stop warning unless already complete
+            try:
+                run = self.get_run(run_id)
+                if run.lifecycle == RunLifecycle.LIVE:
+                    if run.live_progress >= run.live_total:
+                        run.lifecycle = RunLifecycle.COMPLETED
+                    else:
+                        run.lifecycle = RunLifecycle.FAILED
+                        run.warnings = list(run.warnings or []) + ["Stopped by user"]
+                    run.updated_at = datetime.now(UTC)
+                    self._persist_run(run)
+            except Exception:
+                pass
+        except Exception as exc:
+            try:
+                run = self.get_run(run_id)
+                run.lifecycle = RunLifecycle.FAILED
+                run.warnings = list(run.warnings or []) + [f"Live worker error: {exc}"]
+                run.updated_at = datetime.now(UTC)
+                self._persist_run(run)
+            except Exception:
+                pass
+        finally:
+            self._live_threads.pop(run_id, None)
+            self._stop_events.pop(run_id, None)
 
     def _load_companion_frames(self, companion_dataset_ids: dict[str, str] | None) -> tuple[dict[str, object], list[str]]:
         frames: dict[str, object] = {}
