@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import contextlib
 import json
+import os
 from pathlib import Path
 from threading import Lock
 from typing import Any
@@ -33,23 +35,20 @@ class StorageService:
         return json.loads(path.read_text(encoding="utf-8"))
 
     def write_json(self, path: Path, payload: list[dict[str, Any]]) -> None:
-        lock = self._file_locks.get(path)
-        if lock:
-            with lock:
-                self._atomic_write(path, payload)
-        else:
-            self._atomic_write(path, payload)
+        self._atomic_write(path, payload)
 
     def _atomic_write(self, path: Path, payload: list[dict[str, Any]]) -> None:
-        tmp = path.with_suffix(".tmp")
+        tmp = path.with_name(path.stem + f".{os.getpid()}.tmp")
         tmp.write_text(json.dumps(payload, indent=2, default=str), encoding="utf-8")
         tmp.replace(path)
 
     def upsert_record(self, path: Path, key: str, value: str, record: dict[str, Any]) -> None:
-        rows = self.read_json(path)
-        rows = [row for row in rows if row.get(key) != value]
-        rows.append(record)
-        self.write_json(path, rows)
+        lock = self._file_locks.get(path)
+        with (lock if lock else contextlib.nullcontext()):
+            rows = self.read_json(path)
+            rows = [row for row in rows if row.get(key) != value]
+            rows.append(record)
+            self._atomic_write(path, rows)
 
     def list_records(self, path: Path) -> list[dict[str, Any]]:
         return self.read_json(path)
