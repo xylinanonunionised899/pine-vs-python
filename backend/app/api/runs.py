@@ -44,6 +44,8 @@ def create_replay_run(payload: ReplayRunRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except TimeoutError as e:
+        raise HTTPException(status_code=408, detail=str(e))
 
 
 @router.post("/live")
@@ -60,3 +62,5 @@ def create_live_run(payload: ReplayRunRequest):
         raise HTTPException(status_code=404, detail=str(e))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except TimeoutError as e:
+        raise HTTPException(status_code=408, detail=str(e))

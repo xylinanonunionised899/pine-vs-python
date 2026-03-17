@@ -150,16 +150,22 @@ class PythonStrategyEngine:
                 raise ValueError("Python strategy must define run_strategy(frame)")
             return fn(base_frame.copy(), **strategy_kwargs)
 
-        with ThreadPoolExecutor(max_workers=1) as pool:
-            future = pool.submit(_run)
-            try:
-                result = future.result(timeout=self._EXECUTION_TIMEOUT_SECONDS)
-            except FuturesTimeoutError:
-                future.cancel()
-                raise TimeoutError(
-                    f"Strategy execution exceeded {self._EXECUTION_TIMEOUT_SECONDS}s timeout. "
-                    "Check for infinite loops or excessive computation."
-                )
+        # Use shutdown(wait=False) so a timed-out thread is abandoned rather than
+        # blocking __exit__ indefinitely. Python has no safe thread-kill primitive;
+        # the orphaned thread will run to completion (or forever) in the background,
+        # but the caller receives the TimeoutError immediately.
+        pool = ThreadPoolExecutor(max_workers=1)
+        future = pool.submit(_run)
+        try:
+            result = future.result(timeout=self._EXECUTION_TIMEOUT_SECONDS)
+        except FuturesTimeoutError:
+            pool.shutdown(wait=False)
+            raise TimeoutError(
+                f"Strategy execution exceeded {self._EXECUTION_TIMEOUT_SECONDS}s timeout. "
+                "Check for infinite loops or excessive computation."
+            )
+        finally:
+            pool.shutdown(wait=False)
 
         if not isinstance(result, pd.DataFrame):
             raise ValueError("run_strategy(frame) must return a pandas DataFrame")
