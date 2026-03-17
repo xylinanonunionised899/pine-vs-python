@@ -15,7 +15,7 @@ _tmp_dir: tempfile.TemporaryDirectory | None = None
 def pytest_configure(config) -> None:
     """Point DATA_ROOT at a temp directory before any app modules are imported."""
     global _tmp_dir
-    _tmp_dir = tempfile.TemporaryDirectory(prefix="trading_tests_")
+    _tmp_dir = tempfile.TemporaryDirectory(prefix="trading_tests_", ignore_cleanup_errors=True)
     os.environ["DATA_ROOT"] = _tmp_dir.name
 
 
