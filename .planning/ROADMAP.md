@@ -1,5 +1,8 @@
 # Roadmap: Trading Strategy Comparator — Dynamic Pine Script Engine
 
+> Historical roadmap document. The current product status and forward backlog now live in:
+> `docs/v1-final-status.md`, `docs/current-status.md`, `docs/testing-and-verification.md`, and `docs/v2-backlog.md`.
+
 ## Overview
 
 This milestone adds dynamic Pine Script execution to the Trading Strategy Comparator via PineTS (TypeScript transpiler+runtime). The work moves from engine integration (PineTS installed, transpiling Pine Script against OHLCV data, producing outputs) to chart visualization (candles, indicators, trade markers rendered on the Pine screen) to UX completion (Pine Automation tab, caching, comparison integration, Web Worker performance). Every phase builds on the previous -- PineTS must execute before charts can render, charts must render before UX polish matters.

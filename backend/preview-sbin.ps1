@@ -1,0 +1,2 @@
+. "$PSScriptRoot\set-pythonpath.ps1"
+python -c "import json; from app.models.contracts import DataSourceConfig; from app.core.data_manager import DataManager; payload = DataSourceConfig(type='excel', name='SBIN workbook', file_path=r'C:\Users\sakth\Downloads\SBIN_5.xlsx', symbol='SBIN', timeframe='5m'); result = DataManager().preview_import(payload); print(json.dumps(result, default=str, indent=2))"

@@ -7,6 +7,7 @@ import type {
   DatasetPreview,
   DataSourceConfig,
   DependencyStatus,
+  IndicatorLibraryEntry,
   OllamaModelInfo,
   PermissionGrant,
   RunConfig,
@@ -157,4 +158,34 @@ export async function grantPermission(payload: {
 
 export async function getDatasetCandles(datasetId: string): Promise<CandlePoint[]> {
   return apiFetch<CandlePoint[]>(`/data-sources/${datasetId}/candles`);
+}
+
+// ── Indicator Library ──────────────────────────────────
+
+export async function listIndicators(): Promise<IndicatorLibraryEntry[]> {
+  return apiFetch<IndicatorLibraryEntry[]>("/indicators");
+}
+
+export async function getIndicator(indicatorId: string): Promise<IndicatorLibraryEntry> {
+  return apiFetch<IndicatorLibraryEntry>(`/indicators/${indicatorId}`);
+}
+
+export async function saveIndicator(payload: {
+  name: string;
+  description: string;
+  category: string;
+  pine_code: string;
+  python_code: string;
+  series_names: string[];
+  is_builtin?: boolean;
+}): Promise<IndicatorLibraryEntry> {
+  return apiFetch<IndicatorLibraryEntry>("/indicators", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function deleteIndicator(indicatorId: string): Promise<void> {
+  await apiFetch<{ status: string }>(`/indicators/${indicatorId}`, { method: "DELETE" });
 }

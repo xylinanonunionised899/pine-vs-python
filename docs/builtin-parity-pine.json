@@ -1,0 +1,142 @@
+[
+  {
+    "indicator_id": "ind-ema-crossover",
+    "name": "EMA Crossover",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "ema_fast",
+      "ema_slow",
+      "long_condition"
+    ],
+    "produced_series": [
+      "ema_fast",
+      "ema_slow",
+      "long_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.332Z"
+  },
+  {
+    "indicator_id": "ind-rsi",
+    "name": "RSI",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "rsi",
+      "long_condition",
+      "short_condition"
+    ],
+    "produced_series": [
+      "rsi",
+      "long_condition",
+      "short_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.363Z"
+  },
+  {
+    "indicator_id": "ind-macd",
+    "name": "MACD",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "macd_line",
+      "signal_line",
+      "histogram",
+      "long_condition"
+    ],
+    "produced_series": [
+      "macd_line",
+      "signal_line",
+      "histogram",
+      "long_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.414Z"
+  },
+  {
+    "indicator_id": "ind-supertrend",
+    "name": "Super Trend",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "supertrend",
+      "direction",
+      "long_condition"
+    ],
+    "produced_series": [
+      "supertrend",
+      "direction",
+      "long_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.452Z"
+  },
+  {
+    "indicator_id": "ind-bollinger-bands",
+    "name": "Bollinger Bands",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "bb_middle",
+      "bb_upper",
+      "bb_lower",
+      "long_condition"
+    ],
+    "produced_series": [
+      "bb_middle",
+      "bb_upper",
+      "bb_lower",
+      "long_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.488Z"
+  },
+  {
+    "indicator_id": "ind-vwap-bands",
+    "name": "VWAP 3-Band",
+    "dataset_id": "dataset-demo-5m",
+    "is_demo_fallback": true,
+    "bars": 300,
+    "warmup": 50,
+    "status": "pass",
+    "expected_series": [
+      "vwap",
+      "vwap_upper1",
+      "vwap_lower1",
+      "vwap_upper2",
+      "vwap_lower2",
+      "vwap_upper3",
+      "vwap_lower3",
+      "long_condition"
+    ],
+    "produced_series": [
+      "vwap",
+      "vwap_upper1",
+      "vwap_lower1",
+      "vwap_upper2",
+      "vwap_lower2",
+      "vwap_upper3",
+      "vwap_lower3",
+      "long_condition"
+    ],
+    "issues": [],
+    "certified_at": "2026-03-16T08:26:44.503Z"
+  }
+]

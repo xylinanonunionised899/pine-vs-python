@@ -1,0 +1,341 @@
+{
+    "batch_mode":  "sequential_stop_on_block",
+    "source_mode":  "individual_pdf_extract",
+    "notes":  [
+                  "Each numbered PDF is treated as an independent Pine script.",
+                  "Only advance when the current PDF reaches saved, unless the user explicitly asks to skip a blocked file.",
+                  "PDF 01 was skipped by user instruction on 2026-03-12 so the batch could proceed to PDF 02."
+              ],
+    "entries":  [
+                    {
+                        "pdf_name":  "indictr pine (1).pdf",
+                        "page_number":  1,
+                        "status":  "skipped",
+                        "strategy_name":  "Reversal Radar v2",
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+                                               "legend table",
+                                               "mtf bias table",
+                                               "plotshape diamonds",
+                                               "alertcondition blocks"
+                                           ],
+                        "blocked_reason":  "Skipped by user instruction on 2026-03-12 to continue the batch with PDF 02."
+                    },
+                    {
+                        "pdf_name":  "indictr pine (2).pdf",
+                        "page_number":  2,
+                        "status":  "saved",
+                        "strategy_name":  "Baha\u0027i Reversal Points [CC]",
+                        "library_entry_name":  "Baha\u0027i Reversal Points [CC]",
+                        "converted_blocks":  [
+                                                 "core reversal score math (lpSum, hpSum, slo, sig)",
+                                                 "PineTS-safe default chart-timeframe non-repaint path",
+                                                 "visible buy/sell marker series",
+                                                 "hidden alignment output series",
+                                                 "custom indicator library save"
+                                             ],
+                        "skipped_blocks":  [
+                                               "non-default request.security resolution override",
+                                               "alertcondition declarations"
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (3).pdf",
+                        "page_number":  3,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (4).pdf",
+                        "page_number":  4,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (5).pdf",
+                        "page_number":  5,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (6).pdf",
+                        "page_number":  6,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (7).pdf",
+                        "page_number":  7,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (8).pdf",
+                        "page_number":  8,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (9).pdf",
+                        "page_number":  9,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (10).pdf",
+                        "page_number":  10,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (11).pdf",
+                        "page_number":  11,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (12).pdf",
+                        "page_number":  12,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (13).pdf",
+                        "page_number":  13,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (14).pdf",
+                        "page_number":  14,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (15).pdf",
+                        "page_number":  15,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (16).pdf",
+                        "page_number":  16,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (17).pdf",
+                        "page_number":  17,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (18).pdf",
+                        "page_number":  18,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (19).pdf",
+                        "page_number":  19,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (20).pdf",
+                        "page_number":  20,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (21).pdf",
+                        "page_number":  21,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (22).pdf",
+                        "page_number":  22,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    },
+                    {
+                        "pdf_name":  "indictr pine (23).pdf",
+                        "page_number":  23,
+                        "status":  "pending",
+                        "strategy_name":  null,
+                        "library_entry_name":  null,
+                        "converted_blocks":  [
+
+                                             ],
+                        "skipped_blocks":  [
+
+                                           ],
+                        "blocked_reason":  null
+                    }
+                ]
+}

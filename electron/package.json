@@ -1,0 +1,62 @@
+{
+  "name": "trading-strategy-comparator",
+  "version": "1.0.0",
+  "description": "Local-first Pine Script and Python trading strategy comparator",
+  "author": "Trading Strategy Comparator",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win nsis"
+  },
+  "devDependencies": {
+    "electron": "^36.0.0",
+    "electron-builder": "^26.0.0"
+  },
+  "build": {
+    "appId": "com.trading.strategy-comparator",
+    "productName": "Trading Strategy Comparator",
+    "copyright": "Copyright © 2026",
+    "directories": {
+      "output": "../dist-installer",
+      "buildResources": "assets"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "loading.html",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "asInvoker",
+      "signAndEditExecutable": false,
+      "signExts": []
+    },
+    "forceCodeSigning": false,
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Trading Strategy Comparator",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "deleteAppDataOnUninstall": false
+    },
+    "extraResources": [
+      {
+        "from": ".stage/backend/",
+        "to": "backend",
+        "filter": ["**/*"]
+      }
+    ]
+  }
+}

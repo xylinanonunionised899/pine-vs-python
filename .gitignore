@@ -1,0 +1,45 @@
+﻿# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Build output (large — rebuild with build-installer.ps1)
+dist-installer/
+build-output/
+backend/dist/
+backend/build/
+backend/vendor/
+electron/.stage/
+
+# Logs
+*.log
+backend-error.log
+backend.log
+
+# Test coverage
+coverage/
+playwright-report/
+test-results/
+
+# Data (user-specific, not committed)
+data/uploads/*
+data/cache/*
+data/artifacts/*
+data/datasets/*
+data/runs/*
+!data/uploads/.gitkeep
+!data/cache/.gitkeep
+!data/artifacts/.gitkeep
+
+# Misc
+.env
+*.pyc
+frontend/tsconfig.tsbuildinfo

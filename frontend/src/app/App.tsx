@@ -6,6 +6,8 @@ import type {
   DatasetPreview,
   DataSourceConfig,
   DependencyStatus,
+  IndicatorCategory,
+  IndicatorLibraryEntry,
   OllamaModelInfo,
   PermissionGrant,
   RunConfig,
@@ -17,7 +19,9 @@ import { BrowserRouter, NavLink, Navigate, Route, Routes, useNavigate } from "re
 
 import { defaultBridgeJson, defaultDataSource, defaultPineArtifact, defaultPythonArtifact, defaultRunConfig } from "@/lib/defaults";
 import { usePineExecution } from "@/hooks/usePineExecution";
+import { AlignmentPage } from "@/pages/AlignmentPage";
 import { ImportsPage } from "@/pages/ImportsPage";
+import { IndicatorLibraryPage } from "@/pages/IndicatorLibraryPage";
 import { RunsPage } from "@/pages/RunsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { WorkspacePage } from "@/pages/WorkspacePage";
@@ -34,9 +38,12 @@ import {
   listDatasets,
   listOllamaModels,
   listPermissions,
+  listIndicators,
   listRuns,
   previewDataSource,
   saveDataset,
+  saveIndicator,
+  deleteIndicator,
 } from "@/services/api";
 import { connectRunStream } from "@/services/websocket";
 
@@ -46,6 +53,7 @@ type AppState = {
   runs: RunStatus[];
   permissions: PermissionGrant[];
   bridgeArtifacts: BridgeArtifact[];
+  indicators: IndicatorLibraryEntry[];
   dataSource: DataSourceConfig;
   runConfig: RunConfig;
   pineArtifact: StrategyArtifact;
@@ -78,6 +86,24 @@ function pickDefaultChatModel(models: OllamaModelInfo[], currentSelection: strin
   return chatModels.find((model) => model.name === "qwen3.5-9b-claude:latest")?.name ?? chatModels[0]?.name ?? "offline-fallback";
 }
 
+function pickInitialDatasetId(datasets: DatasetArtifact[], currentSelection: string | null): string | null {
+  if (currentSelection && datasets.some((dataset) => dataset.dataset_id === currentSelection)) {
+    return currentSelection;
+  }
+  return datasets.find((dataset) => dataset.dataset_id === "dataset-demo-5m")?.dataset_id
+    ?? [...datasets].sort((a, b) => b.row_count - a.row_count)[0]?.dataset_id
+    ?? null;
+}
+
+function pickInitialRunId(runs: RunStatus[], currentSelection: string | null): string | null {
+  if (currentSelection && runs.some((run) => run.run_id === currentSelection)) {
+    return currentSelection;
+  }
+  return runs.find((run) => run.run_id === "run-demo-ema")?.run_id
+    ?? runs[0]?.run_id
+    ?? null;
+}
+
 function AppRoutes() {
   const navigate = useNavigate();
   const [state, setState] = useState<AppState>({
@@ -86,6 +112,7 @@ function AppRoutes() {
     runs: [],
     permissions: [],
     bridgeArtifacts: [],
+    indicators: [],
     dataSource: defaultDataSource,
     runConfig: defaultRunConfig,
     pineArtifact: defaultPineArtifact,
@@ -116,6 +143,44 @@ function AppRoutes() {
 
   const preferredChatModel = pickDefaultChatModel(state.availableModels, state.selectedChatModel);
 
+  const attachCompanionDataset = (dataset: DatasetArtifact) => {
+    const alias = dataset.symbol?.trim() || dataset.name.trim() || dataset.dataset_id;
+    setState((current) => {
+      if (dataset.dataset_id === current.selectedDatasetId) {
+        return {
+          ...current,
+          backendNotice: "Primary dataset is already available to the run. Attach a different dataset as a companion series.",
+        };
+      }
+      return {
+        ...current,
+        runConfig: {
+          ...current.runConfig,
+          companion_dataset_ids: {
+            ...current.runConfig.companion_dataset_ids,
+            [alias]: dataset.dataset_id,
+          },
+        },
+        backendNotice: null,
+      };
+    });
+  };
+
+  const detachCompanionDataset = (alias: string) => {
+    setState((current) => {
+      const nextCompanions = { ...current.runConfig.companion_dataset_ids };
+      delete nextCompanions[alias];
+      return {
+        ...current,
+        runConfig: {
+          ...current.runConfig,
+          companion_dataset_ids: nextCompanions,
+        },
+        backendNotice: null,
+      };
+    });
+  };
+
   const refreshCore = async () => {
     const results = await Promise.allSettled([
       getDependencyStatus(),
@@ -124,9 +189,10 @@ function AppRoutes() {
       listPermissions(),
       listBridgeArtifacts(),
       listOllamaModels(),
+      listIndicators(),
     ]);
 
-    const [dependenciesResult, datasetsResult, runsResult, permissionsResult, bridgeResult, modelsResult] = results;
+    const [dependenciesResult, datasetsResult, runsResult, permissionsResult, bridgeResult, modelsResult, indicatorsResult] = results;
     const dependencyFailure = results.find((result) => result.status === "rejected");
 
     setState((current) => {
@@ -134,6 +200,7 @@ function AppRoutes() {
       const runs = runsResult.status === "fulfilled" ? runsResult.value : current.runs;
       const permissions = permissionsResult.status === "fulfilled" ? permissionsResult.value : current.permissions;
       const bridgeArtifacts = bridgeResult.status === "fulfilled" ? bridgeResult.value : current.bridgeArtifacts;
+      const indicators = indicatorsResult.status === "fulfilled" ? indicatorsResult.value : current.indicators;
       const availableModels = modelsResult.status === "fulfilled" ? modelsResult.value : current.availableModels;
       const selectedChatModel = pickDefaultChatModel(availableModels, current.selectedChatModel);
 
@@ -144,10 +211,11 @@ function AppRoutes() {
         runs,
         permissions,
         bridgeArtifacts,
+        indicators,
         availableModels,
         selectedChatModel,
-        selectedDatasetId: current.selectedDatasetId ?? ([...datasets].sort((a, b) => b.row_count - a.row_count)[0]?.dataset_id ?? null),
-        selectedRunId: current.selectedRunId ?? runs[0]?.run_id ?? null,
+        selectedDatasetId: pickInitialDatasetId(datasets, current.selectedDatasetId),
+        selectedRunId: pickInitialRunId(runs, current.selectedRunId),
         selectedBridgeArtifactId: current.selectedBridgeArtifactId ?? bridgeArtifacts[0]?.artifact_id ?? null,
         backendNotice: dependencyFailure && current.datasets.length === 0 && current.runs.length === 0
           ? describeUiError("Backend status", dependencyFailure.reason)
@@ -242,7 +310,13 @@ function AppRoutes() {
         bridge_artifact_id: state.selectedBridgeArtifactId,
       };
       const run = kind === "replay" ? await createReplayRun(payload) : await createLiveRun(payload);
-      setState((current) => ({ ...current, selectedRunId: run.run_id, backendNotice: null }));
+      // Immediately inject the returned run so the chart updates without waiting for refreshCore
+      setState((current) => ({
+        ...current,
+        selectedRunId: run.run_id,
+        runs: [run, ...current.runs.filter((r) => r.run_id !== run.run_id)],
+        backendNotice: null,
+      }));
       await refreshCore();
       navigate("/workspace");
     });
@@ -315,6 +389,47 @@ function AppRoutes() {
     }
   };
 
+  const handleSaveToLibrary = async (name: string, description: string, category: IndicatorCategory) => {
+    await runTask("saveLibrary", async () => {
+      // Derive series names: runtime Pine → runtime Python run → declared outputs fallback.
+      const pineNames = pineExecution.indicators.map((s) => s.name);
+      const pythonNames = (currentRun?.python_series ?? []).map((s) => s.name);
+      const declaredNames = [
+        ...(state.pineArtifact.declared_outputs ?? []),
+        ...(state.pythonArtifact.declared_outputs ?? []),
+      ];
+      const seriesNames = [...new Set([...pineNames, ...pythonNames, ...declaredNames].filter(Boolean))];
+
+      await saveIndicator({
+        name,
+        description,
+        category,
+        pine_code: state.pineArtifact.source_code,
+        python_code: state.pythonArtifact.source_code,
+        series_names: seriesNames,
+        is_builtin: false,
+      });
+      await refreshCore();
+      setState((current) => ({ ...current, backendNotice: null }));
+    });
+  };
+
+  const handleLoadIndicator = (entry: IndicatorLibraryEntry) => {
+    setState((current) => ({
+      ...current,
+      pineArtifact: { ...current.pineArtifact, source_code: entry.pine_code, name: entry.name },
+      pythonArtifact: { ...current.pythonArtifact, source_code: entry.python_code, name: entry.name },
+    }));
+    navigate("/workspace");
+  };
+
+  const handleDeleteIndicator = async (indicatorId: string) => {
+    await runTask("deleteIndicator", async () => {
+      await deleteIndicator(indicatorId);
+      await refreshCore();
+    });
+  };
+
   const handleRunPine = async () => {
     let candles = pineCandles;
     if (candles.length === 0) {
@@ -339,6 +454,7 @@ function AppRoutes() {
         <div className="status-pills">
           <span className="pill">{state.dependencies?.ollama.available ? "Ollama ready" : "Ollama optional"}</span>
           <span className="pill">{state.selectedDatasetId ? "Dataset linked" : "No dataset saved"}</span>
+          <span className="pill">{Object.keys(state.runConfig.companion_dataset_ids).length > 0 ? `${Object.keys(state.runConfig.companion_dataset_ids).length} companion series` : "No companion series"}</span>
           <span className="pill accent">{state.runConfig.symbol} ? {state.runConfig.timeframe} ? {state.runConfig.mode}</span>
         </div>
       </header>
@@ -348,6 +464,8 @@ function AppRoutes() {
         <NavLink to="/workspace">Workspace</NavLink>
         <NavLink to="/runs">Runs</NavLink>
         <NavLink to="/settings">Settings</NavLink>
+        <NavLink to="/alignment">Alignment</NavLink>
+        <NavLink to="/library">Library</NavLink>
       </nav>
 
       {state.backendNotice ? <div className="banner warning">{state.backendNotice}</div> : null}
@@ -360,11 +478,15 @@ function AppRoutes() {
               dataSource={state.dataSource}
               preview={state.preview}
               datasets={state.datasets}
+              selectedDatasetId={state.selectedDatasetId}
+              companionDatasetIds={state.runConfig.companion_dataset_ids}
               busy={busy}
               onDataSourceChange={(dataSource) => setState((current) => ({ ...current, dataSource }))}
               onPreview={previewSource}
               onSave={saveCurrentDataset}
               onSelectDataset={(datasetId) => setState((current) => ({ ...current, selectedDatasetId: datasetId, backendNotice: null }))}
+              onAttachCompanion={attachCompanionDataset}
+              onDetachCompanion={detachCompanionDataset}
             />
           }
         />
@@ -376,6 +498,7 @@ function AppRoutes() {
               pineArtifact={state.pineArtifact}
               pythonArtifact={state.pythonArtifact}
               currentRun={currentRun}
+              isDemoDataset={currentDataset?.source?.extra?.seeded_demo === true}
               bridgeArtifacts={state.bridgeArtifacts}
               selectedBridgeArtifactId={state.selectedBridgeArtifactId}
               permissions={state.permissions}
@@ -396,6 +519,7 @@ function AppRoutes() {
               llmResponse={state.llmResponse}
               pineCandles={pineCandles}
               onRunPine={() => void handleRunPine()}
+              companionDatasetIds={state.runConfig.companion_dataset_ids}
               pineExecutionState={{
                 isRunning: pineExecution.isRunning,
                 indicators: pineExecution.indicators,
@@ -403,6 +527,7 @@ function AppRoutes() {
                 errors: pineExecution.errors,
                 lastRunAt: pineExecution.lastRunAt,
               }}
+              onSaveToLibrary={(name, desc, cat) => void handleSaveToLibrary(name, desc, cat)}
             />
           }
         />
@@ -422,10 +547,43 @@ function AppRoutes() {
               onRefreshModels={() => void refreshCore()}
               onSubmitBridge={() => void submitBridgeArtifact()}
               pineSource={state.pineArtifact.source_code}
+              runConfig={state.runConfig}
             />
           }
         />
-        <Route path="*" element={<Navigate to="/imports" replace />} />
+        <Route
+          path="/alignment"
+          element={
+            <AlignmentPage
+              currentRun={currentRun}
+              pineCandles={pineCandles}
+              pineExecutionState={{
+                isRunning: pineExecution.isRunning,
+                indicators: pineExecution.indicators,
+                trades: pineExecution.trades,
+                errors: pineExecution.errors,
+                lastRunAt: pineExecution.lastRunAt,
+              }}
+              runs={state.runs}
+              selectedRunId={state.selectedRunId}
+              onSelectRun={(runId) => setState((current) => ({ ...current, selectedRunId: runId }))}
+              pineArtifact={state.pineArtifact}
+              pythonArtifact={state.pythonArtifact}
+            />
+          }
+        />
+        <Route
+          path="/library"
+          element={
+            <IndicatorLibraryPage
+              indicators={state.indicators}
+              onLoadToWorkspace={handleLoadIndicator}
+              onDelete={(id) => void handleDeleteIndicator(id)}
+              onRefresh={() => void refreshCore()}
+            />
+          }
+        />
+        <Route path="*" element={<Navigate to="/workspace" replace />} />
       </Routes>
     </div>
   );
@@ -438,4 +596,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

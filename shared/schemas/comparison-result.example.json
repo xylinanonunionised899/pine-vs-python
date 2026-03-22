@@ -1,0 +1,34 @@
+﻿{
+  "summary": {
+    "aligned": false,
+    "total_series": 2,
+    "mismatched_series": 1,
+    "total_trade_events": 2,
+    "mismatched_trade_events": 0
+  },
+  "series_mismatches": [
+    {
+      "classification": "python_implementation",
+      "series_name": "ema_fast",
+      "timestamp": "2026-03-09T09:15:00Z",
+      "expected": 245.51,
+      "actual": 244.84,
+      "delta": 0.67,
+      "message": "Python EMA diverged after the warmup window.",
+      "suspected_region": "python: indicators/ema_fast"
+    }
+  ],
+  "trade_mismatches": [],
+  "first_mismatch": {
+    "classification": "python_implementation",
+    "series_name": "ema_fast",
+    "timestamp": "2026-03-09T09:15:00Z",
+    "expected": 245.51,
+    "actual": 244.84,
+    "delta": 0.67,
+    "message": "Python EMA diverged after the warmup window.",
+    "suspected_region": "python: indicators/ema_fast"
+  },
+  "unsupported_feature_warnings": [],
+  "suggested_next_action": "Inspect the Python EMA smoothing implementation and warmup seed."
+}

@@ -1,8 +1,18 @@
 from __future__ import annotations
 
+import collections
+import dataclasses
+import enum
+import functools
 import inspect
+import itertools
+import logging
 import math
+import re
 import statistics
+import sys
+import typing
+import warnings
 from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeoutError
 from types import MappingProxyType
 from typing import Any
@@ -60,10 +70,22 @@ def _infer_pane(values: list[float | None], candle_close: list[float]) -> str:
 class PythonStrategyEngine:
     _ALLOWED_IMPORTS = MappingProxyType(
         {
+            # numerics
             "math": math,
             "statistics": statistics,
             "numpy": np,
             "pandas": pd,
+            # stdlib used by indicator scripts
+            "collections": collections,
+            "dataclasses": dataclasses,
+            "enum": enum,
+            "functools": functools,
+            "itertools": itertools,
+            "logging": logging,
+            "re": re,
+            "sys": sys,
+            "typing": typing,
+            "warnings": warnings,
         }
     )
     _EXECUTION_TIMEOUT_SECONDS: int = 30

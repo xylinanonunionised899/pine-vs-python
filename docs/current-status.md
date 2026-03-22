@@ -1,65 +1,97 @@
 # Current Status
 
+This document describes the repo as of March 18, 2026.
+
 ## Deployment target
 
-This app is designed for **trusted single-user local desktop use only**. It is not designed for, and should not be used as, a networked or multi-user service. All API endpoints are unauthenticated. The backend should only ever bind to `127.0.0.1` (loopback).
+This app is designed for **trusted single-user local desktop use only**.
 
-This document is the truth-source for what is finished, partial, or still placeholder as of March 10, 2026.
+It is acceptable for:
+
+- one local desktop user
+- localhost-only backend access
+- trusted user-authored Pine and Python strategy code
+
+It is not intended for:
+
+- networked deployment
+- multi-user access
+- untrusted code execution
+
+See [Production Readiness](production-readiness.md) for the final position.
 
 ## Finished
 
-### Data import
+### Desktop product
+
+- Windows desktop installer
+- Electron startup health polling
+- packaged FastAPI backend + embedded frontend SPA
+- first-run seeded demo dataset and demo replay run
+- direct Workspace opening on first launch
+
+### Data import and storage
 
 - Excel preview
 - CSV preview
 - inferred column mapping
 - dataset save to normalized CSV
 - saved dataset listing
+- atomic JSON writes with per-file locking for local artifact storage
+- isolated test data root for pytest
 
 ### Run orchestration
 
 - replay run creation
-- dataset-backed live playback
+- dataset-backed incremental live playback
 - run persistence
-- run listing
-- run retrieval
+- run listing and retrieval
 - run progress WebSocket
+- live run cancellation and cleanup
+- failed-state handling for live worker crashes
 
-### Python side
+### Python execution
 
 - local Python execution contract
-- indicator extraction from numeric and boolean columns
-- simple long entry and exit extraction from `long_condition`
+- indicator extraction from numeric and boolean outputs
+- simple trade extraction from `long_condition`
+- wall-clock timeout around strategy execution
+- trusted-local hardening for the local runtime model
 
-### Pine side
+### Pine workflow
 
-- manual bridge artifact upload
-- bridge artifact persistence
-- bridge artifact selection during run creation
+- PineTS-based local Pine execution in the frontend
+- manual bridge artifact upload and persistence
+- bridge artifact selection during runs
 
-### Comparison
+### Comparison and library
 
 - indicator series comparison
 - trade comparison
 - mismatch classification and first mismatch output
+- Alignment page
+- built-in indicator library
+- custom save-to-library flow with persisted `series_names`
+
+### Verification and release tooling
+
+- backend automated tests
+- frontend production build
+- Pine built-in parity certification
+- Python built-in parity certification
+- combined Pine + Python parity report
+- Playwright smoke coverage for the main routes
+- desktop installer smoke checklist
+- release checklist
 
 ### Ollama
 
 - local model discovery
 - chat-capable filtering
 - default model selection
-- plain-text prompt shaping
-- response sanitization
-- fallback behavior for missing models, timeout, offline, and empty cleaned response
-
-### Frontend shell
-
-- route-based layout
-- imports page
-- workspace page
-- runs page
-- settings page
-- backend-unavailable notice handling
+- prompt shaping and sanitization
+- fallback behavior for missing model, timeout, offline, and cleaned-empty response
+- machine-agnostic Ollama path resolution via env, PATH, and fallback discovery
 
 ## Partial
 
@@ -67,93 +99,82 @@ This document is the truth-source for what is finished, partial, or still placeh
 
 - candles render
 - price-like overlays render
-- non-price-like series are detected but not shown in their own pane
+- oscillator-style series can be classified into a sub-pane
+- charting is still not a full multi-pane technical-analysis workspace
 
-### Approvals
+### Pine truth workflow
 
-- grant history works
-- permission checks work in the backend
-- UI can toggle approval entries
-- patch application flow is not complete
-
-### Pine workflow
-
-- manual bridge artifact path works
-- automated TradingView bridge does not exist yet
+- local PineTS execution works for the supported Pine surface
+- exact TradingView truth still relies on manual bridge artifacts for some scripts
+- automated TradingView bridge does not exist
 
 ### Live mode
 
-- incremental playback works
-- real market provider live streaming does not exist yet
+- incremental playback from a saved dataset works
+- provider-backed real market streaming is not implemented
 
-## Placeholder or planned only
+### Approval workflow
 
-- SQLite persistence as the active store
-- DuckDB and Parquet persistence as the active store
+- permission grants and TTL behavior work
+- UI can toggle approval entries
+- patch generation/application from the UI is still incomplete
+
+## Planned or intentionally not built
+
+- network auth or multi-user tenancy
+- production-grade untrusted-code isolation
 - provider-backed Polygon fetch flow
-- TradingView automation worker
-- local Pine subset runtime
-- multi-user auth
-- production-grade runtime isolation
-- LLM patch generation and file application from the UI
+- automated TradingView bridge worker
+- local Pine subset runtime separate from PineTS
+- broker or exchange-connected trading
 - token streaming in chat
-- chart sub-panes for RSI, MACD, and other oscillators
-- full Playwright regression suite
+- CI-managed smoke orchestration without manual server startup
 
-## Known issues and limitations
+## Known limitations
 
-### Storage mismatch
+### Trusted-local security model
 
-The settings file and older plans reference SQLite and DuckDB, but the running code currently uses JSON and CSV artifact storage under `data/`.
+The Python runtime is acceptable only for the trusted-local desktop target.
+It must not be treated as a production-grade sandbox for untrusted users.
 
-### Chart visibility
+### File import scope
 
-Indicators are not guaranteed to appear visually unless:
+Local file import is intended for supported spreadsheet and CSV files only.
 
-- a run exists
-- the strategy emitted numeric outputs
-- the indicator is price-like enough to overlay on the candle scale
+### Active storage model
 
-This is why Pine or Python charts can appear to show only candles even when indicator data exists.
-
-### Python strategy contract
-
-The Python strategy must define:
-
-```python
-def run_strategy(frame: pd.DataFrame) -> pd.DataFrame:
-    ...
-```
-
-If it does not, the backend run creation fails.
+The running app currently uses JSON and CSV artifact storage under `data/` or `%APPDATA%`.
+Older plans that mention SQLite or DuckDB as active storage are historical.
 
 ### Live mode naming
 
-Current `live` behavior is replay-based incremental playback from a saved dataset.
-It is not external live data.
+`live` currently means replay-style bar-by-bar progression from a saved dataset.
+It is not an external market feed.
 
 ### Provider gap
 
-`polygon` is visible in the UI and contracts, but the active backend data loader does not yet fetch remote provider data.
+`polygon` remains visible in shared contracts and some UI paths, but active provider-backed fetching is not implemented.
 
-### Pine automation gap
+### Pine truth gap
 
-The app compares against uploaded Pine results, not a real automated TradingView session yet.
+Some Pine strategies still need manual bridge artifacts for exact parity checking.
 
-### Security gap
+## Recommended next work
 
-The local Python runtime is not a fully hardened sandbox and should not be treated as a production-grade untrusted-code execution environment.
+The forward-looking backlog is tracked in:
 
-## Recommended next priorities
+- [V2 Backlog](v2-backlog.md)
 
-1. Add sub-pane indicator rendering so RSI, MACD, and similar outputs are visible.
-2. Make provider-backed data fetching real or hide the provider option until implemented.
-3. Replace JSON and CSV storage with the planned SQLite and DuckDB layers.
-4. Harden the Python execution model.
-5. Add Playwright smoke coverage for the route shell and core workflows.
+The short version:
 
-## Release-readiness summary
+1. Canonical certification on a real dataset such as SBIN
+2. CI-friendly smoke entrypoint
+3. Auto-update and installer versioning
+4. Real provider-backed live data
+5. PineTS performance work on large datasets
 
-- Local prototype: yes
-- Single-user pilot: yes
-- Production-ready system: no — trusted single-user local desktop only; not designed for networked or multi-user deployment
+## Release summary
+
+- Trusted local desktop use: yes
+- Distribution-ready v1: yes
+- Networked or multi-user production system: no

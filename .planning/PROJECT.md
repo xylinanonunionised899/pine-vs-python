@@ -1,5 +1,8 @@
 # Trading Strategy Comparator — Dynamic Pine Script Engine
 
+> Historical planning document. The current source of truth is in:
+> `docs/v1-final-status.md`, `docs/current-status.md`, `docs/testing-and-verification.md`, and `docs/v2-backlog.md`.
+
 ## What This Is
 
 A local-first monorepo for comparing Pine Script and Python trading strategies on synchronized charts. The project has a React+TypeScript frontend (Vite) and FastAPI backend with dual editors, dual charts, comparison engine, and Ollama LLM assistant. This milestone adds **dynamic Pine Script execution** via **PineTS** (TypeScript Pine Script transpiler+runtime) — so ANY Pine Script pasted into the Pine editor auto-runs locally in the browser and displays candles + indicators on the Pine screen.
