@@ -63,7 +63,7 @@ export function DataControlPanel({ dataSource, runConfig, onDataSourceChange, on
         <input
           value={dataSource.file_path ?? ""}
           onChange={(event) => onDataSourceChange({ ...dataSource, file_path: event.target.value })}
-          placeholder="C:\\Users\\sakth\\Downloads\\SBIN_5.xlsx"
+          placeholder="C:\\path\\to\\your\\data.xlsx"
         />
       </label>
       <label className="field">

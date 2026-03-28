@@ -16,10 +16,8 @@ Writes two artefacts to docs/:
 
 Usage (from repo root):
 
-  # Python-only
-  PYTHONPATH="D:/python , pine script" \\
-      C:/Users/sakth/Desktop/vayu/.venv/Scripts/python.exe \\
-      scripts/certify_builtins.py
+  # Python-only (from repo root, with venv activated)
+  python scripts/certify_builtins.py
 
   # Pine + Python combined
   cd "D:/python , pine script/frontend" && npm run test:parity
@@ -355,14 +353,14 @@ def _write_markdown(
         'cd "D:\\python , pine script"',
         "",
         "# Python only",
-        "C:\\Users\\sakth\\Desktop\\vayu\\.venv\\Scripts\\python.exe scripts\\certify_builtins.py",
+        "python scripts/certify_builtins.py",
         "",
         "# Combined Pine + Python",
         "cd frontend && npm run test:parity && cd ..",
-        "C:\\Users\\sakth\\Desktop\\vayu\\.venv\\Scripts\\python.exe scripts\\certify_builtins.py --include-pine",
+        "python scripts/certify_builtins.py --include-pine",
         "",
         "# Strict (fail on demo-only data)",
-        "C:\\Users\\sakth\\Desktop\\vayu\\.venv\\Scripts\\python.exe scripts\\certify_builtins.py --strict",
+        "python scripts/certify_builtins.py --strict",
         "```",
         "",
     ]

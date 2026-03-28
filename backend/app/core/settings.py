@@ -28,7 +28,12 @@ def _default_ollama_bin() -> Path:
     found = shutil.which("ollama")
     if found:
         return Path(found)
-    return Path(r"C:\Users\sakth\AppData\Local\Programs\Ollama\ollama.exe")
+    # Fallback: assume ollama is on PATH or installed in default location
+    if sys.platform == "win32":
+        default = Path(os.environ.get("LOCALAPPDATA", "")) / "Programs" / "Ollama" / "ollama.exe"
+        if default.exists():
+            return default
+    return Path("ollama")
 
 
 class Settings(BaseSettings):
